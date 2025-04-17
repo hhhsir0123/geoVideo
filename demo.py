@@ -1,3 +1,4 @@
+import os
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -5,6 +6,7 @@ import contextily as ctx
 from shapely.geometry import LineString, Point
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from PIL import Image
+from pathlib import Path
 import numpy as np
 
 # === 1. 广州 -> 深圳 路线 ===
@@ -21,8 +23,13 @@ points = interpolate_route(line, 100)
 route_gdf = gpd.GeoSeries([line], crs="EPSG:4326")
 
 # === 3. 火车图标（红色矩形模拟） ===
-train_icon = Image.new("RGBA", (20, 10), (255, 0, 0, 255))
-train_img = OffsetImage(train_icon, zoom=0.5)
+# train_icon = Image.new("RGBA", (20, 10), (255, 0, 0, 255))
+base_img_path = Path(__file__).parent / "figures"
+# print(img_path)
+train_icon = Image.open(base_img_path / "cute_train.png")  # 自定义火车图标文件
+train_img = OffsetImage(train_icon, zoom=0.1)
+# train_icon = Image.new("RGBA", (20, 10), (255, 0, 0, 255))
+# train_img = OffsetImage(train_icon, zoom=0.5)
 
 # === 4. 设置画布和坐标系 ===
 fig, ax = plt.subplots(figsize=(10, 8))
@@ -52,7 +59,7 @@ def draw_frame(i):
 ani = animation.FuncAnimation(fig, draw_frame, frames=len(points), interval=100, repeat=False)
 
 # --- 保存为 GIF ---
-ani.save("train_map_with_basemap.gif", writer="pillow")
+ani.save(base_img_path / "train_map_with_basemap.gif", writer="pillow")
 
 # --- 或保存为 MP4（需要 ffmpeg）---
 # ani.save("train_map_with_basemap.mp4", writer="ffmpeg", fps=10)
